@@ -4,7 +4,7 @@ description = "Trait abstracting over cryptographic hash-functions"
 documentation = "https://krl.github.io/rustdoc/cryptohash/cryptohash/index.html"
 repository = "https://github.com/krl/cryptohash"
 name = "cryptohash"
-version = "0.1.0"
+version = "0.1.1"
 license="MIT OR Apache-2.0"
 
 [dependencies]

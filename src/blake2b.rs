@@ -3,7 +3,7 @@ use std::fmt;
 
 use blake2_rfc::blake2b;
 
-use {CryptoHash, CryptoHashState};
+use {CryptoHash, State};
 
 /// Wraps Blake2b in the `CryptoHash` trait
 #[derive(Clone)]
@@ -18,10 +18,10 @@ impl CryptoHash for Blake2b {
     }
 }
 
-#[derive(PartialEq, Eq, Clone)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct BlakeDigestWrap([u8; 32]);
 
-impl CryptoHashState<BlakeDigestWrap> for blake2b::Blake2b {
+impl State<BlakeDigestWrap> for blake2b::Blake2b {
     fn fin(self) -> BlakeDigestWrap {
         let mut bytes: [u8; 32];
 
