@@ -18,7 +18,7 @@ impl CryptoHash for Blake2b {
     }
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord, Clone)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Hash)]
 pub struct BlakeDigestWrap([u8; 32]);
 
 impl State<BlakeDigestWrap> for blake2b::Blake2b {

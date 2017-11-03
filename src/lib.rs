@@ -2,6 +2,7 @@
 extern crate blake2_rfc;
 
 use std::io::Write;
+use std::hash::Hash;
 
 mod blake2b;
 
@@ -21,7 +22,7 @@ where
     Self: 'static + Clone,
 {
     /// The output type of the hash function
-    type Digest: AsRef<[u8]> + Clone + PartialOrd + Ord + PartialEq + Eq + std::fmt::Display;
+    type Digest: AsRef<[u8]> + Copy + Hash + Ord + Eq + std::fmt::Display;
     /// The hash-state currently being computed
     type State: Write + State<Self::Digest>;
     /// Constructor for a new hash-state
