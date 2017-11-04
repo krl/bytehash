@@ -43,6 +43,12 @@ impl AsRef<[u8]> for BlakeDigestWrap {
     }
 }
 
+impl AsMut<[u8]> for BlakeDigestWrap {
+    fn as_mut<'a>(&'a mut self) -> &'a mut [u8] {
+        &mut self.0
+    }
+}
+
 impl fmt::Display for BlakeDigestWrap {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for i in self.as_ref() {

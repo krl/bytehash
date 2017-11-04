@@ -22,7 +22,13 @@ where
     Self: 'static + Clone,
 {
     /// The output type of the hash function
-    type Digest: AsRef<[u8]> + Copy + Hash + Ord + Eq + std::fmt::Display;
+    type Digest: AsRef<[u8]>
+        + AsMut<[u8]>
+        + Copy
+        + Hash
+        + Ord
+        + Eq
+        + std::fmt::Display;
     /// The hash-state currently being computed
     type State: Write + State<Self::Digest>;
     /// Constructor for a new hash-state
