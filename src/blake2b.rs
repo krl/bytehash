@@ -6,7 +6,7 @@ use blake2_rfc::blake2b;
 use {CryptoHash, State};
 
 /// Wraps Blake2b in the `CryptoHash` trait
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Blake2b {}
 
 impl CryptoHash for Blake2b {

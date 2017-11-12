@@ -19,7 +19,7 @@ where
 /// A wrapper trait for cryptographic hash functions
 pub trait CryptoHash
 where
-    Self: 'static + Clone,
+    Self: 'static + Clone + std::fmt::Debug,
 {
     /// The output type of the hash function
     type Digest: AsRef<[u8]>
