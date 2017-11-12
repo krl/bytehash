@@ -28,7 +28,8 @@ where
         + Hash
         + Ord
         + Eq
-        + std::fmt::Display;
+        + std::fmt::Display
+        + std::fmt::Debug;
     /// The hash-state currently being computed
     type State: Write + State<Self::Digest>;
     /// Constructor for a new hash-state

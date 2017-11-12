@@ -57,3 +57,13 @@ impl fmt::Display for BlakeDigestWrap {
         Ok(())
     }
 }
+
+impl fmt::Debug for BlakeDigestWrap {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "<")?;
+        for i in self.as_ref() {
+            write!(f, "{:02x}", i)?;
+        }
+        write!(f, ">")
+    }
+}
