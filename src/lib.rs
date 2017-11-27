@@ -1,7 +1,6 @@
 //! Trait abstracting over cryptographic hash-functions.
 extern crate blake2_rfc;
 
-use std::mem;
 use std::io::Write;
 use std::hash::Hash;
 
@@ -33,12 +32,10 @@ where
         + std::fmt::Debug;
     /// The hash-state currently being computed
     type State: Write + State<Self::Digest>;
+    /// All zero hash, used as Null/None
+    const NULL: Self::Digest;
     /// Constructor for a new hash-state
     fn state() -> Self::State;
-    /// Return an all-zero digest
-    fn null() -> Self::Digest {
-        unsafe { mem::zeroed() }
-    }
 }
 
 #[cfg(test)]
@@ -46,9 +43,10 @@ mod tests {
     use super::*;
     use std::io::Write;
     use blake2b::Blake2b;
+    use std::mem;
 
     #[test]
-    fn blake() {
+    fn blake2b() {
         let mut state = Blake2b::state();
         state.write(b"hello world").unwrap();
 
@@ -56,7 +54,9 @@ mod tests {
             format!("{}", state.fin()),
             "256c83b297114d201b30179f3f0ef0cace9783622da5974326b436178aeef610"
         );
-
-        assert_eq!(Blake2b::null(), Blake2b::null());
+        unsafe {
+            let zeroed = mem::zeroed();
+            assert_eq!(Blake2b::NULL, zeroed);
+        }
     }
 }

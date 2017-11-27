@@ -12,6 +12,40 @@ pub struct Blake2b {}
 impl CryptoHash for Blake2b {
     type State = blake2b::Blake2b;
     type Digest = BlakeDigestWrap;
+    const NULL: Self::Digest = BlakeDigestWrap([
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+    ]);
 
     fn state() -> Self::State {
         blake2b::Blake2b::new(32)
@@ -60,10 +94,9 @@ impl fmt::Display for BlakeDigestWrap {
 
 impl fmt::Debug for BlakeDigestWrap {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "<")?;
-        for i in self.as_ref() {
+        for i in self.as_ref().iter().take(3) {
             write!(f, "{:02x}", i)?;
         }
-        write!(f, ">")
+        Ok(())
     }
 }
