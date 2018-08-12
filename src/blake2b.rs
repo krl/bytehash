@@ -1,102 +1,43 @@
-use std::mem;
-use std::fmt;
+use std::io::{self, Write};
 
 use blake2_rfc::blake2b;
 
-use {CryptoHash, State};
+use ByteHash;
 
-/// Wraps Blake2b in the `CryptoHash` trait
-#[derive(Clone, Debug)]
-pub struct Blake2b {}
-
-impl CryptoHash for Blake2b {
-    type State = blake2b::Blake2b;
-    type Digest = BlakeDigestWrap;
-    const NULL: Self::Digest = BlakeDigestWrap([
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-    ]);
-
-    fn state() -> Self::State {
-        blake2b::Blake2b::new(32)
-    }
+/// Wrapping of `Blake2b` in `ByteHash`
+pub struct Blake2b {
+    buf: [u8; 32],
+    state: blake2b::Blake2b,
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Hash)]
-pub struct BlakeDigestWrap([u8; 32]);
-
-impl State<BlakeDigestWrap> for blake2b::Blake2b {
-    fn fin(self) -> BlakeDigestWrap {
-        let mut bytes: [u8; 32];
-
-        let fin = self.finalize();
-        let resultbytes = fin.as_bytes();
-
-        // this is safe since we always fill the buffer completely.
-        unsafe { bytes = mem::uninitialized() }
-        for i in 0..bytes.len() {
-            bytes[i] = resultbytes[i]
+impl Default for Blake2b {
+    fn default() -> Self {
+        Blake2b {
+            state: blake2b::Blake2b::new(32),
+            buf: Default::default(),
         }
-        BlakeDigestWrap(bytes)
     }
 }
 
-impl AsRef<[u8]> for BlakeDigestWrap {
-    fn as_ref<'a>(&'a self) -> &'a [u8] {
-        &self.0
+impl ByteHash for Blake2b {
+    type Digest = [u8; 32];
+
+    fn fin(self) -> Self::Digest {
+        let Blake2b { state, mut buf } = self;
+        buf.as_mut()
+            .write(state.finalize().as_bytes())
+            .expect("in-memory write");
+        buf
     }
 }
 
-impl AsMut<[u8]> for BlakeDigestWrap {
-    fn as_mut<'a>(&'a mut self) -> &'a mut [u8] {
-        &mut self.0
+impl Write for Blake2b {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+        self.state.write(buf).expect("in-memory write");
+        Ok(buf.len())
     }
-}
 
-impl fmt::Display for BlakeDigestWrap {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        for i in self.as_ref() {
-            write!(f, "{:02x}", i)?;
-        }
-        Ok(())
-    }
-}
-
-impl fmt::Debug for BlakeDigestWrap {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        for i in self.as_ref().iter().take(3) {
-            write!(f, "{:02x}", i)?;
-        }
+    fn flush(&mut self) -> io::Result<()> {
         Ok(())
     }
 }

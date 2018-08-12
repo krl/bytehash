@@ -1,62 +1,42 @@
-//! Trait abstracting over cryptographic hash-functions.
+#![deny(missing_docs)]
+//! Trait abstracting over hash-functions, allowing digests to be viewed as
+//! byte slices.
 extern crate blake2_rfc;
+extern crate byteorder;
 
 use std::io::Write;
-use std::hash::Hash;
 
 mod blake2b;
+mod hashwrap;
 
 pub use blake2b::Blake2b;
-
-/// The trait for a hash state
-pub trait State<Digest>
-where
-    Digest: AsRef<[u8]>,
-{
-    fn fin(self) -> Digest;
-}
+pub use hashwrap::Wrapped;
 
 /// A wrapper trait for cryptographic hash functions
-pub trait CryptoHash
-where
-    Self: 'static + Clone + std::fmt::Debug,
-{
-    /// The output type of the hash function
-    type Digest: AsRef<[u8]>
-        + AsMut<[u8]>
-        + Copy
-        + Hash
-        + Ord
-        + Eq
-        + std::fmt::Display
-        + std::fmt::Debug;
-    /// The hash-state currently being computed
-    type State: Write + State<Self::Digest>;
-    /// All zero hash, used as Null/None
-    const NULL: Self::Digest;
-    /// Constructor for a new hash-state
-    fn state() -> Self::State;
+pub trait ByteHash: Write {
+    /// The type that is used for the final hash value
+    type Digest: AsRef<[u8]> + AsMut<[u8]>;
+    /// Consumes the `ByteHash` and returns a `Digest`
+    fn fin(self) -> Self::Digest;
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::io::Write;
-    use blake2b::Blake2b;
-    use std::mem;
+    use hashwrap::Wrapped;
+    use std::collections::hash_map::DefaultHasher;
+
+    #[test]
+    fn default() {
+        let mut state = Wrapped::<DefaultHasher>::default();
+        state.write(b"hello world").unwrap();
+        state.fin();
+    }
 
     #[test]
     fn blake2b() {
-        let mut state = Blake2b::state();
+        let mut state = Blake2b::default();
         state.write(b"hello world").unwrap();
-
-        assert_eq!(
-            format!("{}", state.fin()),
-            "256c83b297114d201b30179f3f0ef0cace9783622da5974326b436178aeef610"
-        );
-        unsafe {
-            let zeroed = mem::zeroed();
-            assert_eq!(Blake2b::NULL, zeroed);
-        }
+        state.fin();
     }
 }

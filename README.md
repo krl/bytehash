@@ -1,22 +1,24 @@
-# Cryptohash
+# ByteHash
 
-Trait abstracting over cryptographic hash-functions
+Trait abstracting over hash-functions, allowing digests to be viewed as byte slices.
 
-[Documentation](https://krl.github.io/rustdoc/cryptohash/cryptohash/index.html)
+This allows you to use cryptographic and non-cryptographic hash functions interchangeably.
+
+[Documentation](https://docs.rs/cryptohash/1.0.0/bytehash/)
 
 # Example
 
 ```rust
-use cryptohash::{Blake2b, CryptoHash, CryptoHashState};
+use bytehash::{Blake2b, ByteHash, Wrapped};
+use std::collections::hash_map::DefaultHasher;
 
 fn main() {
-    let mut state = Blake2b::state();
-    state.write(b"hello world").unwrap();
-		
-    assert_eq!(
-    format!("{}", state.fin()),
-            "256c83b297114d201b30179f3f0ef0cace9783622da5974326b436178aeef610"
-    );
-}
+    let mut blake = Blake2b::default();
+    blake.write(b"hello world").unwrap();
+    let hash = blake.fin();
 
+    let mut default = Wrapped::<DefaultHasher>::default();
+    default.write(b"hello world").unwrap();
+    let hash = default.fin();
+}
 ```
