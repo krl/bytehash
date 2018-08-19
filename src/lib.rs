@@ -4,6 +4,8 @@
 extern crate blake2_rfc;
 extern crate byteorder;
 
+use std::fmt;
+use std::hash::Hash;
 use std::io::Write;
 
 mod blake2b;
@@ -12,12 +14,29 @@ mod hashwrap;
 pub use blake2b::Blake2b;
 pub use hashwrap::Wrapped;
 
-/// A wrapper trait for cryptographic hash functions
-pub trait ByteHash: Write {
+/// The main trait
+pub trait ByteHash: 'static + Clone + fmt::Debug {
     /// The type that is used for the final hash value
-    type Digest: AsRef<[u8]> + AsMut<[u8]>;
-    /// Consumes the `ByteHash` and returns a `Digest`
-    fn fin(self) -> Self::Digest;
+    type Digest: AsRef<[u8]>
+        + AsMut<[u8]>
+        + Copy
+        + Clone
+        + Eq
+        + Hash
+        + Default
+        + fmt::Debug;
+
+    /// The state for computing hashes
+    type State: State<Self::Digest> + Write;
+
+    /// Construct a new hash-state
+    fn state() -> Self::State;
+}
+
+/// A hash state being computed
+pub trait State<D> {
+    /// Consumes the state returning a hash
+    fn fin(self) -> D;
 }
 
 #[cfg(test)]
@@ -28,14 +47,14 @@ mod tests {
 
     #[test]
     fn default() {
-        let mut state = Wrapped::<DefaultHasher>::default();
+        let mut state = Wrapped::<DefaultHasher>::state();
         state.write(b"hello world").unwrap();
         state.fin();
     }
 
     #[test]
     fn blake2b() {
-        let mut state = Blake2b::default();
+        let mut state = Blake2b::state();
         state.write(b"hello world").unwrap();
         state.fin();
     }
