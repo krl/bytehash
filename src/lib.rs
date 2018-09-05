@@ -24,7 +24,8 @@ pub trait ByteHash: 'static + Clone + fmt::Debug {
         + Eq
         + Hash
         + Default
-        + fmt::Debug;
+        + fmt::Debug
+        + Send;
 
     /// The state for computing hashes
     type State: State<Self::Digest> + Write;
