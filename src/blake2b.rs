@@ -5,7 +5,7 @@ use blake2_rfc::blake2b;
 use {ByteHash, State};
 
 /// Wrapping of `Blake2b` in `ByteHash`
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Blake2b;
 
 pub struct Blake2bState {

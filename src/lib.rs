@@ -15,7 +15,7 @@ pub use blake2b::Blake2b;
 pub use hashwrap::Wrapped;
 
 /// The main trait
-pub trait ByteHash: 'static + Clone + fmt::Debug {
+pub trait ByteHash: 'static + Clone + fmt::Debug + Eq {
     /// The type that is used for the final hash value
     type Digest: AsRef<[u8]>
         + AsMut<[u8]>

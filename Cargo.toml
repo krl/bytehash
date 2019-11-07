@@ -5,7 +5,7 @@ documentation = "https://docs.rs/bytehash"
 license = "MIT OR Apache-2.0"
 name = "bytehash"
 repository = "https://github.com/krl/bytehash"
-version = "3.0.0"
+version = "0.1.0"
 
 [dependencies]
 blake2-rfc = "0.2.17"

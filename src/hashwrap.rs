@@ -8,7 +8,7 @@ use byteorder::{LittleEndian, WriteBytesExt};
 use {ByteHash, State};
 
 /// Wrapping any `Hasher` in ByteHash
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Wrapped<H>(PhantomData<H>);
 
 /// Wrapped state for computing hashes
@@ -37,7 +37,7 @@ where
 
 impl<H> ByteHash for Wrapped<H>
 where
-    H: 'static + Hasher + Default + Clone + fmt::Debug,
+    H: 'static + Hasher + Default + Clone + fmt::Debug + Eq,
 {
     type Digest = [u8; 8];
     type State = WrappedState<H>;
