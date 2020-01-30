@@ -1,11 +1,12 @@
-use std::io::{self, Write};
+use std::hash::Hasher;
+use std::io::Write;
 
 use blake2_rfc::blake2b;
 
 use {ByteHash, State};
 
 /// Wrapping of `Blake2b` in `ByteHash`
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct Blake2b;
 
 pub struct Blake2bState {
@@ -35,13 +36,12 @@ impl State<[u8; 32]> for Blake2bState {
     }
 }
 
-impl Write for Blake2bState {
-    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
-        self.state.write(buf).expect("in-memory write");
-        Ok(buf.len())
+impl Hasher for Blake2bState {
+    fn write(&mut self, bytes: &[u8]) {
+        self.state.write(bytes).expect("in-memory write");
     }
 
-    fn flush(&mut self) -> io::Result<()> {
-        Ok(())
+    fn finish(&self) -> u64 {
+        panic!("Do not call `finish` on ByteHash, use `fin`")
     }
 }

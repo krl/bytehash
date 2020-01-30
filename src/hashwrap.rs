@@ -1,60 +1,53 @@
-use std::fmt;
 use std::hash::Hasher;
-use std::io::{self, Write};
 use std::marker::PhantomData;
 
-use byteorder::{LittleEndian, WriteBytesExt};
+use byteorder::{BigEndian, WriteBytesExt};
 
 use {ByteHash, State};
 
 /// Wrapping any `Hasher` in ByteHash
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone)]
 pub struct Wrapped<H>(PhantomData<H>);
 
 /// Wrapped state for computing hashes
-#[derive(Default)]
-pub struct WrappedState<H>
-where
-    H: Default,
-{
+pub struct WrappedState<H> {
     buf: [u8; 8],
     state: H,
 }
 
-impl<H: Hasher> Write for WrappedState<H>
-where
-    H: Default,
-{
-    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
-        self.state.write(buf);
-        Ok(buf.len())
+impl<H: Hasher> Hasher for WrappedState<H> {
+    fn write(&mut self, bytes: &[u8]) {
+        self.state.write(bytes)
     }
 
-    fn flush(&mut self) -> io::Result<()> {
-        Ok(())
+    fn finish(&self) -> u64 {
+        panic!("Do not call `finish` on ByteHash, use `fin`")
     }
 }
 
 impl<H> ByteHash for Wrapped<H>
 where
-    H: 'static + Hasher + Default + Clone + fmt::Debug + Eq,
+    H: 'static + Hasher + Default + Clone,
 {
     type Digest = [u8; 8];
     type State = WrappedState<H>;
 
     fn state() -> Self::State {
-        WrappedState::default()
+        WrappedState {
+            buf: [0u8; 8],
+            state: H::default(),
+        }
     }
 }
 
 impl<H> State<[u8; 8]> for WrappedState<H>
 where
-    H: Hasher + Default,
+    H: Hasher,
 {
     fn fin(self) -> [u8; 8] {
         let WrappedState { state, mut buf } = self;
         buf.as_mut()
-            .write_u64::<LittleEndian>(state.finish())
+            .write_u64::<BigEndian>(state.finish())
             .expect("in-memory write");
         buf
     }
