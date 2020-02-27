@@ -6,7 +6,7 @@ use byteorder::{BigEndian, WriteBytesExt};
 use {ByteHash, State};
 
 /// Wrapping any `Hasher` in ByteHash
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct Wrapped<H>(PhantomData<H>);
 
 /// Wrapped state for computing hashes
