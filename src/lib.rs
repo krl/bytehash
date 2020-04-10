@@ -31,7 +31,7 @@ pub trait ByteHash: 'static + Sized + Clone + Default {
     fn state() -> Self::State;
 
     /// Return the hash of a type
-    fn hash<T: Hash>(t: &T) -> Self::Digest {
+    fn hash<T: Hash + ?Sized>(t: &T) -> Self::Digest {
         let mut state = Self::state();
         t.hash(&mut state);
         state.fin()
@@ -62,5 +62,11 @@ mod tests {
         let mut state = Blake2b::state();
         state.write(b"hello world");
         state.fin();
+    }
+
+    #[test]
+    fn oneshot_hash() {
+        let _hash_a = Blake2b::hash(&42u64);
+        let _hash_b = Blake2b::hash("hello");
     }
 }
